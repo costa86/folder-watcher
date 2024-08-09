@@ -87,7 +87,7 @@ func isFolder(name string, folders []string) bool {
 
 func getFolderName(extension string) string {
 	switch extension {
-	case ".txt", ".pdf", ".doc", ".docx":
+	case ".txt", ".pdf", ".doc", ".docx", ".md":
 		return "documents"
 
 	case ".jpg", ".jpeg", ".png":
@@ -96,18 +96,42 @@ func getFolderName(extension string) string {
 	case ".xlsx", ".xls", ".csv":
 		return "datasets"
 
-	case ".iso":
+	case ".iso", ".exe":
 		return "software"
 
-	case ".py", ".js", ".go":
+	case ".epub", ".azw", ".mobi", ".cbz":
+		return "ebook"
+
+	case ".mp3", ".aac", ".wav":
+		return "audio"
+
+	case ".avi", ".mp4", ".mov", ".mkv":
+		return "video"
+
+	case ".py", ".go", ".html", ".css", ".js", ".c", ".java", ".rs":
 		return "code"
+
+	case ".zip", ".rar", ".tar", ".gz":
+		return "compressed"
+
 	default:
 		return "other"
 	}
 }
 
 func main() {
-	folders := []string{"documents", "images", "datasets", "code", "software", "other"}
+	folders := []string{
+		"documents",
+		"images",
+		"datasets",
+		"code",
+		"software",
+		"ebook",
+		"audio",
+		"video",
+		"other",
+		"compressed",
+	}
 
 	if len(os.Args) != 2 {
 		fmt.Println("Folder is missing")

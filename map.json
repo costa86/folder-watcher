@@ -1,0 +1,43 @@
+{
+    "documents": [
+        ".txt",
+        ".pdf",
+        ".doc",
+        ".docx",
+        ".md"
+    ],
+    "images": [
+        ".jpg",
+        ".jpeg",
+        ".png"
+    ],
+    "datasets": [
+        ".xlsx",
+        ".xls",
+        ".csv"
+    ],
+    "software": [
+        ".iso",
+        ".exe"
+    ],
+    "ebook": [
+        ".epub",
+        ".azw",
+        ".mobi",
+        ".cbz"
+    ],
+    "audio": [
+        ".mp3",
+        ".aac",
+        ".wav"
+    ],
+    "video": [
+        ".avi",
+        ".mp4",
+        ".mov",
+        ".mkv"
+    ],
+    "other": [
+        "*"
+    ]
+}
