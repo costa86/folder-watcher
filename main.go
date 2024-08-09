@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -17,11 +19,14 @@ func alert(title, message string) {
 	}
 }
 
-func move(filename, baseFolder string, folders []string) {
+func move(filename, baseFolder, jsonFile string) {
+	extMap := getExtensionMap(jsonFile)
+	folders := getFolderNames(extMap)
 	if isFolder(filename, folders) {
 		return
 	}
-	folder := getFolderName(filepath.Ext(filename))
+
+	folder := getFolderName(extMap, filepath.Ext(filename))
 	createFolder(baseFolder, folder, folders)
 	src := fmt.Sprintf("%s/%s", baseFolder, filename)
 	dest := fmt.Sprintf("%s/%s/%s", baseFolder, folder, filename)
@@ -29,7 +34,7 @@ func move(filename, baseFolder string, folders []string) {
 	alert(fmt.Sprintf("New file to: %s", folder), fmt.Sprintf("Dest: %s", dest))
 }
 
-func startWatching(baseFolder string, folders []string) {
+func startWatching(baseFolder, jsonFile string) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
@@ -46,7 +51,7 @@ func startWatching(baseFolder string, folders []string) {
 
 				if event.Has(fsnotify.Create) {
 					filename := filepath.Base(event.Name)
-					move(filename, baseFolder, folders)
+					move(filename, baseFolder, jsonFile)
 				}
 
 			case err, ok := <-watcher.Errors:
@@ -85,60 +90,58 @@ func isFolder(name string, folders []string) bool {
 	return false
 }
 
-func getFolderName(extension string) string {
-	switch extension {
-	case ".txt", ".pdf", ".doc", ".docx", ".md":
-		return "documents"
-
-	case ".jpg", ".jpeg", ".png":
-		return "images"
-
-	case ".xlsx", ".xls", ".csv":
-		return "datasets"
-
-	case ".iso", ".exe":
-		return "software"
-
-	case ".epub", ".azw", ".mobi", ".cbz":
-		return "ebook"
-
-	case ".mp3", ".aac", ".wav":
-		return "audio"
-
-	case ".avi", ".mp4", ".mov", ".mkv":
-		return "video"
-
-	case ".py", ".go", ".html", ".css", ".js", ".c", ".java", ".rs":
-		return "code"
-
-	case ".zip", ".rar", ".tar", ".gz":
-		return "compressed"
-
-	default:
-		return "other"
+func getExtensionMap(jsonFile string) map[string][]string {
+	file, err := os.Open(jsonFile)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		os.Exit(1)
 	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		os.Exit(1)
+	}
+	var extensionMap map[string][]string
+	err = json.Unmarshal(data, &extensionMap)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+		os.Exit(1)
+	}
+	return extensionMap
+
+}
+
+func getFolderName(extensionMap map[string][]string, extension string) string {
+	for i := range extensionMap {
+		for _, v := range extensionMap[i] {
+			if v == extension {
+				return i
+			}
+		}
+	}
+	return "other"
+}
+
+func getFolderNames(extensionMap map[string][]string) []string {
+	folders := make([]string, 0, len(extensionMap))
+	for folder := range extensionMap {
+		folders = append(folders, folder)
+	}
+	return folders
+
 }
 
 func main() {
-	folders := []string{
-		"documents",
-		"images",
-		"datasets",
-		"code",
-		"software",
-		"ebook",
-		"audio",
-		"video",
-		"other",
-		"compressed",
-	}
 
-	if len(os.Args) != 2 {
-		fmt.Println("Folder is missing")
+	if len(os.Args) != 3 {
+		fmt.Println("Folder or Map file is missing")
 		os.Exit(1)
 	}
 
 	dir := os.Args[1]
+	mapFile := os.Args[2]
 
 	info, err := os.Stat(dir)
 	if err != nil {
@@ -150,6 +153,5 @@ func main() {
 		fmt.Printf("%s is not a directory\n", dir)
 		os.Exit(1)
 	}
-
-	startWatching(dir, folders)
+	startWatching(dir, mapFile)
 }
