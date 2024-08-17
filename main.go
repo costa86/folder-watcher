@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/gen2brain/beeep"
@@ -20,6 +21,7 @@ func alert(title, message string) {
 }
 
 func move(filename, baseFolder, jsonFile string) {
+	time.Sleep(2 * time.Second)
 	extMap := getExtensionMap(jsonFile)
 	folders := getFolderNames(extMap)
 	if isFolder(filename, folders) {
