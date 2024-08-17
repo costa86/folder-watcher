@@ -1,4 +1,4 @@
-module github.com/costa86/download-watcher
+module github.com/costa86/folder-watcher
 
 go 1.22.5
 

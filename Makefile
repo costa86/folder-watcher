@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := run
-BINARY=download-watcher
+BINARY=folder-watcher
 BUILD_CMD := go build --trimpath -ldflags="-s -w"
 BUILD_CMD_LINUX := go build -ldflags="-s -w"
 ARCH := amd64
